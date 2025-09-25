@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -29,9 +30,20 @@ Route::get('/instructor/dashboard', function () {
     return view('instructor.dashboard');
 })->middleware(['auth', 'role:instructor'])->name('instructor.dashboard');
 
-Route::get('/member/dashboard', function () {
-    return view('member.dashboard');
-})->middleware(['auth', 'role:member'])->name('member.dashboard');
+/**  -------- Member Routes Start  ------  */
+
+Route::middleware(['auth', 'role:member'])->prefix('member')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('member.dashboard');
+    })->name('member.dashboard');
+    Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
+    Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
+});
+
+/**  -------- Member Routes Ends  ------  */
+
 
 Route::resource('instructor/schedule', \App\Http\Controllers\ScheduledClassController::class)
     ->middleware(['auth', 'role:instructor']);
@@ -42,4 +54,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

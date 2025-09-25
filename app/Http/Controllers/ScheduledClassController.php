@@ -14,7 +14,7 @@ class ScheduledClassController extends Controller
     public function index()
     {
         // $scheduledClasses = ScheduledClass::where('instructor_id', auth()->id())->with('classType')->get();
-        $scheduledClasses = auth()->user()->scheduledClasses()->with('classType')->where('date_time','>', now())->get();
+        $scheduledClasses = auth()->user()->scheduledClasses()->with('classType')->upcoming()->get();
         return view('instructor.upcoming', compact('scheduledClasses'));
     }
 
