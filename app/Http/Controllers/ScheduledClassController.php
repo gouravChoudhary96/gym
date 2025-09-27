@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ClassCanceled;
 use App\Models\ClassType;
 use App\Models\ScheduledClass;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class ScheduledClassController extends Controller
      */
     public function index()
     {
-        // $scheduledClasses = ScheduledClass::where('instructor_id', auth()->id())->with('classType')->get();
+        // Get all scheduled classes for the authenticated instructor
         $scheduledClasses = auth()->user()->scheduledClasses()->with('classType')->upcoming()->get();
         return view('instructor.upcoming', compact('scheduledClasses'));
     }
@@ -23,12 +24,13 @@ class ScheduledClassController extends Controller
      */
     public function create()
     {
+        // Get all class types for the dropdown
         $classTypes = ClassType::all();
         return view('instructor.schedule', compact('classTypes'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     *  Store a Scheduled Class in storage.
      */
     public function store(Request $request)
     {
@@ -41,7 +43,7 @@ class ScheduledClassController extends Controller
 
        $validated =   $request->validate([
              'class_type_id' => 'required|exists:class_types,id',
-             'date_time' => 'required|date|unique:schedule_classes,date_time|after:now',
+             'date_time' => 'required|date|unique:scheduled_classes,date_time|after:now',
              'instructor_id' => 'required',
          ]);
 
@@ -84,11 +86,15 @@ class ScheduledClassController extends Controller
              abort(403);
         }
 
-        // if(auth()->id() !== $schedule->instructor_id){
-        //     abort(403);
-        // }
         $this->authorize('delete', $schedule);
+        // Delete the scheduled class
         $schedule->delete();
+        // Detach all members from the canceled class
+        $schedule->members()->detach();
+      
+        // Notify members about the cancellation
+        ClassCanceled::dispatch($schedule);
+
         return redirect()->route('schedule.index')->with('success', 'Class deleted successfully.');
     }   
 }
