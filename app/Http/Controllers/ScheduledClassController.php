@@ -34,22 +34,22 @@ class ScheduledClassController extends Controller
      */
     public function store(Request $request)
     {
-         $date_time = $request->input('date') . ' ' . $request->input('time');
+        $date_time = $request->input('date') . ' ' . $request->input('time');
 
-         $request->merge([
-             'date_time' => $date_time,
-             'instructor_id' => auth()->id(),
-         ]);
+        $request->merge([
+            'date_time' => $date_time,
+            'instructor_id' => auth()->id(),
+        ]);
 
-       $validated =   $request->validate([
-             'class_type_id' => 'required|exists:class_types,id',
-             'date_time' => 'required|date|unique:scheduled_classes,date_time|after:now',
-             'instructor_id' => 'required',
-         ]);
+        $validated =   $request->validate([
+            'class_type_id' => 'required|exists:class_types,id',
+            'date_time' => 'required|date|unique:scheduled_classes,date_time|after:now',
+            'instructor_id' => 'required',
+        ]);
 
-         ScheduledClass::create($validated);
+        ScheduledClass::create($validated);
 
-          return redirect()->route('schedule.index')->with('success', 'Class Add successfully.');
+        return redirect()->route('schedule.index')->with('success', 'Class Add successfully.');
     }
 
     /**
@@ -82,19 +82,24 @@ class ScheduledClassController extends Controller
     public function destroy(ScheduledClass $schedule)
     {
 
-        if(auth()->user()->cannot('delete',$schedule)){
-             abort(403);
+        if (auth()->user()->cannot('delete', $schedule)) {
+            abort(403);
         }
 
         $this->authorize('delete', $schedule);
-        // Delete the scheduled class
-        $schedule->delete();
-        // Detach all members from the canceled class
-        $schedule->members()->detach();
-      
-        // Notify members about the cancellation
+
         ClassCanceled::dispatch($schedule);
 
+        // Detach all members from the canceled class
+        $schedule->members()->detach();
+
+        // Notify members about the cancellation
+        
+        // Delete the scheduled class
+        $schedule->delete();
+
+
+
         return redirect()->route('schedule.index')->with('success', 'Class deleted successfully.');
-    }   
+    }
 }
