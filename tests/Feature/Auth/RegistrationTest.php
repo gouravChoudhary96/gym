@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     public function test_registration_screen_can_be_rendered(): void
     {
@@ -22,8 +22,9 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'role' => 'member',
+            'password' => '12345678',
+            'password_confirmation' => '12345678',
         ]);
 
         $this->assertAuthenticated();

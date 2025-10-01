@@ -46,9 +46,7 @@ class ScheduledClassController extends Controller
             'date_time' => 'required|date|unique:scheduled_classes,date_time|after:now',
             'instructor_id' => 'required',
         ]);
-
-        ScheduledClass::create($validated);
-
+         ScheduledClass::create($validated);
         return redirect()->route('schedule.index')->with('success', 'Class Add successfully.');
     }
 

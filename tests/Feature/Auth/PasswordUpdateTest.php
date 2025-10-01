@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     public function test_password_can_be_updated(): void
     {
@@ -19,7 +19,7 @@ class PasswordUpdateTest extends TestCase
             ->actingAs($user)
             ->from('/profile')
             ->put('/password', [
-                'current_password' => 'password',
+                'current_password' => '12345678',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
